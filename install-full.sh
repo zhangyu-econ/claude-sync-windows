@@ -58,8 +58,14 @@ if [ -z "$PYTHON_CMD" ]; then
 fi
 echo "Using Python: $PYTHON_CMD"
 
-# Create directories
-mkdir -p ~/.claude-code/slash-commands
+# Create directories - use new skills system for Claude Code
+mkdir -p ~/.claude/skills/sync-full
+mkdir -p ~/.claude/skills/sync-pull
+mkdir -p ~/.claude/skills/sync-push
+mkdir -p ~/.claude/skills/sync-pull-full
+mkdir -p ~/.claude/skills/sync-push-full
+mkdir -p ~/.claude/skills/sync-status
+mkdir -p ~/.claude/skills/sync-full-setup
 mkdir -p ~/.claude-sync
 
 # Download the extended sync script (Windows-compatible version)
@@ -67,11 +73,16 @@ echo "Downloading claude-sync-extended.py..."
 curl -sSL -o ~/claude-sync-extended.py \
     https://raw.githubusercontent.com/zhangyu-econ/claude-sync-windows/main/claude-sync-extended.py
 
-# Create enhanced slash commands
-echo "Creating extended slash commands..."
+# Create skills (Claude Code's current slash command system)
+echo "Creating Claude Code skills..."
 
 # /sync-full-setup
-cat > ~/.claude-code/slash-commands/sync-full-setup.md << 'EOF'
+cat > ~/.claude/skills/sync-full-setup/SKILL.md << 'EOF'
+---
+name: sync-full-setup
+description: Configure Claude Context Sync with a GitHub repository
+---
+
 Configure Claude Context Sync Extended with full data synchronization.
 
 ```bash
@@ -91,7 +102,12 @@ echo "Run /sync-status to see what will be synced"
 EOF
 
 # /sync-status
-cat > ~/.claude-code/slash-commands/sync-status.md << 'EOF'
+cat > ~/.claude/skills/sync-status/SKILL.md << 'EOF'
+---
+name: sync-status
+description: Show detailed Claude Context Sync status
+---
+
 Show detailed Claude Context Sync status and what will be synced.
 
 ```bash
@@ -100,7 +116,12 @@ python ~/claude-sync-extended.py status
 EOF
 
 # /sync-pull-full
-cat > ~/.claude-code/slash-commands/sync-pull-full.md << 'EOF'
+cat > ~/.claude/skills/sync-pull-full/SKILL.md << 'EOF'
+---
+name: sync-pull-full
+description: Pull ALL Claude data from remote repository
+---
+
 Pull ALL Claude data from remote repository (sessions, settings, MCP configs).
 
 ```bash
@@ -112,7 +133,12 @@ echo "Full data sync completed!"
 EOF
 
 # /sync-push-full
-cat > ~/.claude-code/slash-commands/sync-push-full.md << 'EOF'
+cat > ~/.claude/skills/sync-push-full/SKILL.md << 'EOF'
+---
+name: sync-push-full
+description: Push ALL Claude data to remote repository
+---
+
 Push ALL Claude data to remote repository for other PCs to access.
 
 ```bash
@@ -124,7 +150,12 @@ echo "All data pushed to remote!"
 EOF
 
 # /sync-full
-cat > ~/.claude-code/slash-commands/sync-full.md << 'EOF'
+cat > ~/.claude/skills/sync-full/SKILL.md << 'EOF'
+---
+name: sync-full
+description: Perform complete bidirectional sync of ALL Claude data
+---
+
 Perform complete bidirectional sync of ALL Claude data.
 
 ```bash
@@ -135,8 +166,13 @@ echo "Complete sync finished!"
 ```
 EOF
 
-# Keep the simple commands too
-cat > ~/.claude-code/slash-commands/sync-pull.md << 'EOF'
+# /sync-pull
+cat > ~/.claude/skills/sync-pull/SKILL.md << 'EOF'
+---
+name: sync-pull
+description: Pull Claude context from remote (essential data only)
+---
+
 Pull Claude context from remote (essential data only).
 
 ```bash
@@ -146,7 +182,13 @@ echo "Essential data synchronized"
 ```
 EOF
 
-cat > ~/.claude-code/slash-commands/sync-push.md << 'EOF'
+# /sync-push
+cat > ~/.claude/skills/sync-push/SKILL.md << 'EOF'
+---
+name: sync-push
+description: Push Claude context to remote (essential data only)
+---
+
 Push Claude context to remote (essential data only).
 
 ```bash
