@@ -1,6 +1,6 @@
 #!/bin/bash
-# Claude Context Sync Extended - Full sync installer
-# Usage: curl -sSL https://example.com/install-full.sh | bash -s -- REPO_URL [essential|full]
+# Claude Context Sync Extended - Full sync installer (Windows-compatible)
+# Usage: curl -sSL https://raw.githubusercontent.com/zhangyu-econ/claude-sync-windows/main/install-full.sh | bash -s -- REPO_URL [essential|full]
 
 set -e
 
@@ -10,8 +10,8 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${BLUE}🚀 Claude Context Sync Extended Installer${NC}"
-echo "=========================================="
+echo -e "${BLUE}Claude Context Sync Extended Installer (Windows)${NC}"
+echo "=================================================="
 
 # Get arguments
 GITHUB_REPO="${1:-}"
@@ -23,7 +23,7 @@ if [ -z "$GITHUB_REPO" ]; then
 fi
 
 if [[ ! "$GITHUB_REPO" =~ ^https://github\.com/[^/]+/[^/]+(.git)?$ ]]; then
-    echo -e "${RED}❌ Invalid GitHub repository URL${NC}"
+    echo -e "${RED}Invalid GitHub repository URL${NC}"
     exit 1
 fi
 
@@ -33,26 +33,42 @@ fi
 
 # Validate sync level
 if [[ "$SYNC_LEVEL" != "essential" && "$SYNC_LEVEL" != "full" ]]; then
-    echo -e "${YELLOW}⚠ Invalid sync level '$SYNC_LEVEL', using 'essential'${NC}"
+    echo -e "${YELLOW}Invalid sync level '$SYNC_LEVEL', using 'essential'${NC}"
     SYNC_LEVEL="essential"
 fi
 
-echo -e "${BLUE}📦 Installing Claude Context Sync Extended...${NC}"
+echo -e "${BLUE}Installing Claude Context Sync Extended...${NC}"
 echo "Repository: $GITHUB_REPO"
 echo "Sync Level: $SYNC_LEVEL"
+
+# Detect Python command (Windows uses 'python', Linux/macOS uses 'python3')
+PYTHON_CMD=""
+if command -v python &>/dev/null; then
+    PY_VER=$(python --version 2>&1 | grep -oP '\d+' | head -1)
+    if [ "$PY_VER" = "3" ]; then
+        PYTHON_CMD="python"
+    fi
+fi
+if [ -z "$PYTHON_CMD" ] && command -v python3 &>/dev/null; then
+    PYTHON_CMD="python3"
+fi
+if [ -z "$PYTHON_CMD" ]; then
+    echo -e "${RED}Python 3 not found. Please install Python 3 first.${NC}"
+    exit 1
+fi
+echo "Using Python: $PYTHON_CMD"
 
 # Create directories
 mkdir -p ~/.claude-code/slash-commands
 mkdir -p ~/.claude-sync
 
-# Download the extended sync script
-echo "📥 Downloading claude-sync-extended.py..."
+# Download the extended sync script (Windows-compatible version)
+echo "Downloading claude-sync-extended.py..."
 curl -sSL -o ~/claude-sync-extended.py \
-    https://raw.githubusercontent.com/shaike1/claude-sync/main/claude-sync-extended.py
-chmod +x ~/claude-sync-extended.py
+    https://raw.githubusercontent.com/zhangyu-econ/claude-sync-windows/main/claude-sync-extended.py
 
 # Create enhanced slash commands
-echo "📝 Creating extended slash commands..."
+echo "Creating extended slash commands..."
 
 # /sync-full-setup
 cat > ~/.claude-code/slash-commands/sync-full-setup.md << 'EOF'
@@ -68,9 +84,9 @@ if [ -z "$1" ]; then
 fi
 
 LEVEL="${2:-essential}"
-python3 ~/claude-sync-extended.py setup --git-repo "$1" --level "$LEVEL"
-echo "✅ Extended sync configured!"
-echo "📊 Run /sync-status to see what will be synced"
+python ~/claude-sync-extended.py setup --git-repo "$1" --level "$LEVEL"
+echo "Extended sync configured!"
+echo "Run /sync-status to see what will be synced"
 ```
 EOF
 
@@ -79,7 +95,7 @@ cat > ~/.claude-code/slash-commands/sync-status.md << 'EOF'
 Show detailed Claude Context Sync status and what will be synced.
 
 ```bash
-python3 ~/claude-sync-extended.py status
+python ~/claude-sync-extended.py status
 ```
 EOF
 
@@ -89,10 +105,9 @@ Pull ALL Claude data from remote repository (sessions, settings, MCP configs).
 
 ```bash
 cd ~
-echo "🔄 Pulling full Claude data from remote..."
-python3 ~/claude-sync-extended.py pull
-echo "✅ Full data sync completed!"
-echo "📋 Your sessions, settings, and MCP configs are now synchronized"
+echo "Pulling full Claude data from remote..."
+python ~/claude-sync-extended.py pull
+echo "Full data sync completed!"
 ```
 EOF
 
@@ -102,10 +117,9 @@ Push ALL Claude data to remote repository for other PCs to access.
 
 ```bash
 cd ~
-echo "📤 Pushing full Claude data to remote..."
-python3 ~/claude-sync-extended.py push
-echo "✅ All data pushed to remote!"
-echo "🔗 Other PCs can now pull your sessions, settings, and configurations"
+echo "Pushing full Claude data to remote..."
+python ~/claude-sync-extended.py push
+echo "All data pushed to remote!"
 ```
 EOF
 
@@ -115,16 +129,9 @@ Perform complete bidirectional sync of ALL Claude data.
 
 ```bash
 cd ~
-echo "🔄 Performing full Claude data sync..."
-python3 ~/claude-sync-extended.py sync
-echo "✅ Complete sync finished!"
-echo ""
-echo "📊 Synced data includes:"
-echo "  • 💬 All conversation sessions"
-echo "  • ⚙️  Claude settings and preferences" 
-echo "  • 🔌 MCP server configurations"
-echo "  • 📝 Todo lists and task data"
-echo "  • 🗂️  Project-specific contexts"
+echo "Performing full Claude data sync..."
+python ~/claude-sync-extended.py sync
+echo "Complete sync finished!"
 ```
 EOF
 
@@ -134,8 +141,8 @@ Pull Claude context from remote (essential data only).
 
 ```bash
 cd ~
-python3 ~/claude-sync-extended.py pull
-echo "✅ Essential data synchronized"
+python ~/claude-sync-extended.py pull
+echo "Essential data synchronized"
 ```
 EOF
 
@@ -144,29 +151,34 @@ Push Claude context to remote (essential data only).
 
 ```bash
 cd ~
-python3 ~/claude-sync-extended.py push
-echo "✅ Essential data pushed"
+python ~/claude-sync-extended.py push
+echo "Essential data pushed"
 ```
 EOF
 
 # Setup with provided repo and level
-echo -e "\n${BLUE}⚙️  Configuring with repository and sync level...${NC}"
-python3 ~/claude-sync-extended.py setup --git-repo "$GITHUB_REPO" --level "$SYNC_LEVEL"
+echo ""
+echo -e "${BLUE}Configuring with repository and sync level...${NC}"
+$PYTHON_CMD ~/claude-sync-extended.py setup --git-repo "$GITHUB_REPO" --level "$SYNC_LEVEL"
 
 # Show status
-echo -e "\n${BLUE}📊 Current sync configuration:${NC}"
-python3 ~/claude-sync-extended.py status
+echo ""
+echo -e "${BLUE}Current sync configuration:${NC}"
+$PYTHON_CMD ~/claude-sync-extended.py status
 
 # Try initial sync
-echo -e "\n${BLUE}🔄 Attempting initial sync...${NC}"
-if python3 ~/claude-sync-extended.py push 2>/dev/null; then
-    echo -e "${GREEN}✅ Initial sync successful${NC}"
+echo ""
+echo -e "${BLUE}Attempting initial sync...${NC}"
+if $PYTHON_CMD ~/claude-sync-extended.py push 2>/dev/null; then
+    echo -e "${GREEN}Initial sync successful${NC}"
 else
-    echo -e "${YELLOW}ℹ️  Initial sync skipped (repository might be empty)${NC}"
+    echo -e "${YELLOW}Initial sync skipped (repository might be empty - run a manual push)${NC}"
 fi
 
-echo -e "\n${GREEN}✨ Claude Context Sync Extended installed!${NC}"
-echo -e "\n${BLUE}📋 Available commands:${NC}"
+echo ""
+echo -e "${GREEN}Claude Context Sync Extended installed!${NC}"
+echo ""
+echo -e "${BLUE}Available commands:${NC}"
 echo "Essential sync:"
 echo "  /sync-pull          - Pull context and basic settings"
 echo "  /sync-push          - Push context and basic settings"
@@ -177,23 +189,23 @@ echo "  /sync-push-full     - Push ALL Claude data"
 echo "  /sync-full          - Complete bidirectional sync"
 echo "  /sync-status        - Show detailed sync status"
 echo ""
-echo -e "${BLUE}🎯 What gets synced at '$SYNC_LEVEL' level:${NC}"
+echo -e "${BLUE}What gets synced at '$SYNC_LEVEL' level:${NC}"
 
 if [ "$SYNC_LEVEL" = "essential" ]; then
-    echo "  ✅ CLAUDE.md context files"
-    echo "  ✅ Claude settings (~/.claude.json)"
-    echo "  ✅ Conversation sessions"
-    echo "  ✅ MCP server configurations"
-    echo "  ✅ Todo lists"
+    echo "  CLAUDE.md context files"
+    echo "  Claude settings (~/.claude.json)"
+    echo "  Conversation sessions"
+    echo "  MCP server configurations"
+    echo "  Todo lists"
 else
-    echo "  ✅ Everything from 'essential' plus:"
-    echo "  ✅ Shell integration snapshots"
-    echo "  ✅ Custom slash commands"
-    echo "  ✅ All user preferences"
+    echo "  Everything from 'essential' plus:"
+    echo "  Shell integration snapshots"
+    echo "  Custom slash commands"
+    echo "  All user preferences"
 fi
 
-echo -e "\n${BLUE}🚀 Quick start:${NC}"
+echo ""
+echo -e "${BLUE}Quick start:${NC}"
 echo "1. Use /sync-push-full to upload your current Claude setup"
 echo "2. On other PCs, install with same repo and run /sync-pull-full"
 echo "3. All your sessions, settings, and configs will be synchronized!"
-echo -e "\n${GREEN}Happy syncing! 🎉${NC}"
