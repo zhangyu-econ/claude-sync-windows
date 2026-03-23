@@ -25,6 +25,13 @@ Using Claude Code on multiple PCs? Tired of manually copying `CLAUDE.md` files b
 - **Slash Commands** - Your custom Claude commands
 - **Complete User Profile** - Every setting preserved
 
+## Prerequisites
+
+- **Python 3** (`python` or `python3` on your PATH)
+- **Git** with credentials configured
+- **Windows**: Run commands in **Git Bash** (comes with [Git for Windows](https://gitforwindows.org/)) or **WSL**. CMD and PowerShell are not supported for the installer.
+- **macOS/Linux**: Any terminal works.
+
 ## One-Line Installation
 
 ### Basic Context Sync
