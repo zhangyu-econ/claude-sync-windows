@@ -342,6 +342,8 @@ class ClaudeSyncExtended:
             print("No Git repository configured. Run 'setup' first.")
             return False
 
+        if operation == "sync":
+            operation = "both"
         return self.sync_git(operation)
 
 
