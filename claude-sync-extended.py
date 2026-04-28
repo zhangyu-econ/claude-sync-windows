@@ -41,7 +41,7 @@ class ClaudeSyncExtended:
     def load_config(self) -> Dict:
         """Load or create configuration"""
         if self.config_path.exists():
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
 
         default_config = {
@@ -53,8 +53,8 @@ class ClaudeSyncExtended:
         }
 
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_path, 'w') as f:
-            json.dump(default_config, f, indent=2)
+        with open(self.config_path, 'w', encoding='utf-8') as f:
+            json.dump(default_config, f, indent=2, ensure_ascii=False)
 
         return default_config
 
@@ -124,8 +124,8 @@ class ClaudeSyncExtended:
             "platform": platform.system()
         }
 
-        with open(staging_dir / "metadata.json", 'w') as f:
-            json.dump(metadata, f, indent=2)
+        with open(staging_dir / "metadata.json", 'w', encoding='utf-8') as f:
+            json.dump(metadata, f, indent=2, ensure_ascii=False)
 
         return staging_dir
 
@@ -142,7 +142,7 @@ class ClaudeSyncExtended:
             if not metadata_file.exists():
                 continue
 
-            with open(metadata_file) as f:
+            with open(metadata_file, encoding='utf-8') as f:
                 metadata = json.load(f)
 
             print(f"Restoring data from {metadata['hostname']} ({metadata['timestamp']})")
@@ -199,12 +199,12 @@ class ClaudeSyncExtended:
         try:
             # Load both configs
             if dest_file.exists():
-                with open(dest_file) as f:
+                with open(dest_file, encoding='utf-8') as f:
                     local_config = json.load(f)
             else:
                 local_config = {}
 
-            with open(source_file) as f:
+            with open(source_file, encoding='utf-8') as f:
                 remote_config = json.load(f)
 
             # Merge strategy:
@@ -239,8 +239,8 @@ class ClaudeSyncExtended:
 
             # Write merged config
             dest_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(dest_file, 'w') as f:
-                json.dump(merged_config, f, indent=2)
+            with open(dest_file, 'w', encoding='utf-8') as f:
+                json.dump(merged_config, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
             print(f"Warning: Could not merge Claude config: {e}")
@@ -252,9 +252,9 @@ class ClaudeSyncExtended:
             return
 
         # Read both files
-        with open(source_file) as f:
+        with open(source_file, encoding='utf-8') as f:
             remote_content = f.read()
-        with open(dest_file) as f:
+        with open(dest_file, encoding='utf-8') as f:
             local_content = f.read()
 
         # Simple merge - append unique sections
@@ -264,7 +264,7 @@ class ClaudeSyncExtended:
             shutil.copy2(dest_file, backup)
 
             # Append remote content
-            with open(dest_file, 'w') as f:
+            with open(dest_file, 'w', encoding='utf-8') as f:
                 f.write(local_content)
                 f.write(f"\n\n# Merged from {source_file.parent.name}\n\n")
                 f.write(remote_content)
@@ -363,8 +363,8 @@ def main():
         if args.git_repo:
             sync.config["git_repo"] = args.git_repo
             sync.config["sync_level"] = args.level
-            with open(sync.config_path, 'w') as f:
-                json.dump(sync.config, f, indent=2)
+            with open(sync.config_path, 'w', encoding='utf-8') as f:
+                json.dump(sync.config, f, indent=2, ensure_ascii=False)
             print(f"Configuration saved")
             print(f"Repository: {args.git_repo}")
             print(f"Sync level: {args.level}")
